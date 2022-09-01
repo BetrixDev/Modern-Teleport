@@ -13,10 +13,13 @@ public class TeleportAcceptCommand implements CommandExecutor {
 
     private final ModernTeleport modernTeleport;
     private final TeleportHandler teleportHandler;
+    private final String prefix;
 
     public TeleportAcceptCommand(ModernTeleport modernTeleport, TeleportHandler teleportHandler) {
         this.modernTeleport = modernTeleport;
         this.teleportHandler = teleportHandler;
+
+        this.prefix = modernTeleport.getPrefix();
     }
 
     @Override
@@ -24,16 +27,16 @@ public class TeleportAcceptCommand implements CommandExecutor {
 
         if (sender instanceof Player player) {
             if (!modernTeleport.canUseCommand(player)) {
-                String noPermission = modernTeleport.getConfig().getString("messages.no_permission");
+                String noPermission = config.getString("messages.no_permission");
                 player.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(noPermission.replace("%prefix%", modernTeleport.getPrefix())));
+                        .deserialize(noPermission.replace("%prefix%", prefix)));
                 return true;
             }
 
             if (teleportHandler.hasPendingRequest(player)) {
                 teleportHandler.doTeleport(player);
             } else {
-                String noPending = modernTeleport.getConfig().getString("messages.no_pending_request");
+                String noPending = config.getString("messages.no_pending_request");
 
                 player.sendMessage(
                         MiniMessage.miniMessage().deserialize(noPending.replace("%prefix%", modernTeleport.getPrefix()))

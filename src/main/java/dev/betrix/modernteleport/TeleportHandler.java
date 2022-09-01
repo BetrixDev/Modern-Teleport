@@ -2,6 +2,7 @@ package dev.betrix.modernteleport;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -13,11 +14,15 @@ record TeleportRequest(Player sender, Player target, long time) {
 public class TeleportHandler {
 
     private final ModernTeleport modernTeleport;
+    private final Configuration config;
+    private final String prefix;
     private final HashMap<String, Long> coolDowns = new HashMap<>();
     private final HashMap<String, TeleportRequest> requests = new HashMap<>();
 
     TeleportHandler(ModernTeleport modernTeleport) {
         this.modernTeleport = modernTeleport;
+        this.config = modernTeleport.getConfig();
+        this.prefix = modernTeleport.getPrefix();
     }
 
     public boolean hasPendingRequest(Player target) {
@@ -27,9 +32,8 @@ public class TeleportHandler {
     public void removePendingRequest(Player target) {
         TeleportRequest request = requests.get(target.getUniqueId().toString());
 
-        String confirmation = modernTeleport.getConfig().getString("messages.denied_message_confirmation");
-        String targetDenied = modernTeleport.getConfig().getString("messages.target_denied_message");
-        String prefix = modernTeleport.getConfig().getString("prefix");
+        String confirmation = config.getString("messages.denied_message_confirmation");
+        String targetDenied = config.getString("messages.target_denied_message");
 
         // Send players messages dictating the event
         request.sender().sendMessage(MiniMessage.miniMessage().deserialize(targetDenied
@@ -59,7 +63,7 @@ public class TeleportHandler {
 
     public long getCoolDownTimeLeft(Player player) {
         String uid = player.getUniqueId().toString();
-        long coolDown = this.modernTeleport.getConfig().getLong("cool_down");
+        long coolDown = this.config.getLong("cool_down");
 
         if (coolDowns.containsKey(uid)) {
             long time = coolDowns.get(uid);
@@ -71,8 +75,8 @@ public class TeleportHandler {
     }
 
     public void sendRequest(Player sender, Player target) {
-        String rawMessage = modernTeleport.getConfig().getString("messages.request_message");
-        String prefix = modernTeleport.getConfig().getString("prefix");
+        String rawMessage = config.getString("messages.request_message");
+        String prefix = config.getString("prefix");
         String injectedMessage = rawMessage.replace("%prefix%", prefix).replace("%sender_name%", sender.getName());
 
         Component message = MiniMessage.miniMessage().deserialize(injectedMessage);
@@ -81,7 +85,7 @@ public class TeleportHandler {
         // Store the request
         requests.put(target.getUniqueId().toString(), new TeleportRequest(sender, target, System.currentTimeMillis()));
 
-        int timeout = modernTeleport.getConfig().getInt("request_timout");
+        int timeout = config.getInt("request_timout");
 
         if (timeout == 0) {
             // A timeout of 0 disables it, so we return early
@@ -102,7 +106,7 @@ public class TeleportHandler {
                 if (count == timeout) {
                     requests.remove(targetUid);
 
-                    String message = modernTeleport.getConfig().getString("messages.target_not_respond");
+                    String message = config.getString("messages.target_not_respond");
                     sender.sendMessage(MiniMessage.miniMessage()
                             .deserialize(message.replace("%prefix%", modernTeleport.getPrefix())
                                     .replace("%target_name%", target.getName())));
@@ -118,6 +122,7 @@ public class TeleportHandler {
 
     public boolean doTeleport(Player target) {
         TeleportRequest request = requests.get(target.getUniqueId().toString());
+
         // Run command "/tp PLAYER_NAME TARGET_NAME"
         boolean success = modernTeleport.getServer().dispatchCommand(modernTeleport.getServer().getConsoleSender(),
                 "tp " + request.sender().getName() + " " + target.getName());
