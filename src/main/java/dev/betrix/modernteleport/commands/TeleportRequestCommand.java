@@ -105,6 +105,10 @@ public class TeleportRequestCommand implements CommandExecutor {
 
             // After all checks pass, send the request to the target player
             teleportHandler.sendRequest(player, target);
+
+            String sentMessage = config.getString("messages.request_sent");
+            player.sendMessage(MiniMessage.miniMessage()
+                    .deserialize(sentMessage.replace("%prefix%", prefix).replace("%target_name%", target.getName())));
         }
 
         return true;
