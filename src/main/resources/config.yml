@@ -1,6 +1,8 @@
 # MODERN TELEPORT
 # Written by: https://github.com/BetrixDev
 
+# "modernteleport.reload" permission is required to be able to reload the plugin
+
 # Strings use Kyori Adventure Mini Message formatting, follow the link for more information https://docs.adventure.kyori.net/minimessage/format.html
 
 # Prefix that is shown before messages
@@ -30,3 +32,4 @@ messages:
   player_not_exist: "%prefix% <red>Player does not exist"
   no_permission: "%prefix% <red>You don't have the required permission to use this command"
   target_no_permission: "%prefix% <red>%target_name% does not have the required permission to use this command"
+  config_reloaded: "%prefix% <gold>Config successfully reloaded"

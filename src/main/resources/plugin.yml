@@ -3,6 +3,9 @@ version: '${project.version}'
 main: dev.betrix.modernteleport.ModernTeleport
 api-version: 1.19
 commands:
+  modernteleport:
+    description: "Utility command for Modern Teleport"
+    usage: "/<command> [reload]"
   tprequest:
     description: "Send a teleport request to a player"
     usage: "/<command> PLAYER_NAME"
