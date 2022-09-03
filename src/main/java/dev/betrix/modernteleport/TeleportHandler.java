@@ -92,10 +92,9 @@ public class TeleportHandler {
             return;
         }
 
-        // Create a task that runs every second to check if the request should be canceled
+        // Create a task to run after the timeout has been reached to delete the request if ignored
         new BukkitRunnable() {
             final String targetUid = target.getUniqueId().toString();
-            private int count = 0;
 
             @Override
             public void run() {
@@ -103,21 +102,17 @@ public class TeleportHandler {
                     cancel();
                 }
 
-                if (count == timeout) {
-                    requests.remove(targetUid);
+                requests.remove(targetUid);
 
-                    String message = config.getString("messages.target_not_respond");
-                    sender.sendMessage(MiniMessage.miniMessage()
-                            .deserialize(message.replace("%prefix%", modernTeleport.getPrefix())
-                                    .replace("%target_name%", target.getName())));
+                String message = config.getString("messages.target_not_respond");
+                sender.sendMessage(MiniMessage.miniMessage()
+                        .deserialize(message.replace("%prefix%", modernTeleport.getPrefix())
+                                .replace("%target_name%", target.getName())));
 
-                    // Cancel this tasks
-                    cancel();
-                }
-
-                count++;
+                // Cancel this tasks
+                cancel();
             }
-        }.runTaskTimerAsynchronously(modernTeleport, 0, 20); // Run every second
+        }.runTaskLaterAsynchronously(modernTeleport, 20L * timeout);
     }
 
     public boolean doTeleport(Player target) {
