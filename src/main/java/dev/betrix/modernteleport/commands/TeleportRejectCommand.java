@@ -5,7 +5,6 @@ import dev.betrix.modernteleport.TeleportHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,14 +12,10 @@ public class TeleportRejectCommand implements CommandExecutor {
 
     private final ModernTeleport modernTeleport;
     private final TeleportHandler teleportHandler;
-    private final String prefix;
-    private final Configuration config;
 
     public TeleportRejectCommand(ModernTeleport modernTeleport, TeleportHandler teleportHandler) {
         this.modernTeleport = modernTeleport;
         this.teleportHandler = teleportHandler;
-        this.prefix = modernTeleport.getPrefix();
-        this.config = modernTeleport.getConfig();
     }
 
     @Override

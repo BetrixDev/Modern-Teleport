@@ -29,16 +29,12 @@ public final class ModernTeleport extends JavaPlugin {
         String message = getConfig().getString(messageKey);
 
         ArrayList<TagResolver> resolvers = new ArrayList<>();
-        resolvers.add(Placeholder.parsed("prefix", getPrefix()));
+        resolvers.add(Placeholder.parsed("prefix", getConfig().getString("prefix")));
         resolvers.addAll(Arrays.asList(tagResolvers));
 
 
         player.sendMessage(MiniMessage.miniMessage()
                 .deserialize(message, resolvers.toArray(new TagResolver[0])));
-    }
-
-    public String getPrefix() {
-        return getConfig().getString("prefix");
     }
 
     public void initCommands() {

@@ -6,7 +6,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,13 +16,9 @@ import java.util.List;
 public class ModernTeleportCommand implements CommandExecutor, TabCompleter {
 
     private final ModernTeleport modernTeleport;
-    private final Configuration config;
-    private final String prefix;
 
     public ModernTeleportCommand(ModernTeleport modernTeleport) {
         this.modernTeleport = modernTeleport;
-        this.config = modernTeleport.getConfig();
-        this.prefix = modernTeleport.getPrefix();
     }
 
     @Override
