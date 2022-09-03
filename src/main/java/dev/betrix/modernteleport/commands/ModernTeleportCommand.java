@@ -2,7 +2,6 @@ package dev.betrix.modernteleport.commands;
 
 import dev.betrix.modernteleport.ModernTeleport;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -34,12 +33,8 @@ public class ModernTeleportCommand implements CommandExecutor, TabCompleter {
             if (args[0].equals("reload")) {
                 if (player.hasPermission("modernteleport.reload")) {
                     modernTeleport.reloadConfig();
-
                     modernTeleport.initCommands();
-
-                    player.sendMessage(
-                            MiniMessage.miniMessage().deserialize(
-                                    config.getString("messages.config_reloaded").replace("%prefix%", prefix)));
+                    modernTeleport.messagePlayer(player, "messages.config_reloaded");
                     modernTeleport.playSound(player, Key.key("entity.experience_orb.pickup"));
                 }
             }

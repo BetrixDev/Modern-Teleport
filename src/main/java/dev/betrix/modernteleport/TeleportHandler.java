@@ -1,10 +1,11 @@
 package dev.betrix.modernteleport;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -15,14 +16,12 @@ public class TeleportHandler {
 
     private final ModernTeleport modernTeleport;
     private final Configuration config;
-    private final String prefix;
     private final HashMap<String, Long> coolDowns = new HashMap<>();
     private final HashMap<String, TeleportRequest> requests = new HashMap<>();
 
     TeleportHandler(ModernTeleport modernTeleport) {
         this.modernTeleport = modernTeleport;
         this.config = modernTeleport.getConfig();
-        this.prefix = modernTeleport.getPrefix();
     }
 
     public boolean hasPendingRequest(Player target) {
@@ -30,28 +29,29 @@ public class TeleportHandler {
     }
 
     public void removePendingRequest(Player target) {
-        TeleportRequest request = requests.get(target.getUniqueId().toString());
-
-        String confirmation = config.getString("messages.denied_message_confirmation");
-        String targetDenied = config.getString("messages.target_denied_message");
-
-        // Send players messages dictating the event
-        request.sender().sendMessage(MiniMessage.miniMessage().deserialize(targetDenied
-                .replace("%prefix%", prefix)
-                .replace("%target_name%", target.getName()
-                ))
-        );
-
-        target.sendMessage(
-                MiniMessage.miniMessage().deserialize(confirmation
-                        .replace("%prefix%", prefix)
-                        .replace("%sender_name%", request.sender().getName()
-                        ))
-        );
-
         // Remove request from data
         requests.remove(target.getUniqueId().toString());
+
+        TeleportRequest request = requests.get(target.getUniqueId().toString());
+
+        // Send players messages dictating the event
+        modernTeleport.messagePlayer(request.sender(), "messages.target_denied_message",
+                Placeholder.unparsed("target_name", target.getName()));
+
+        modernTeleport.messagePlayer(target, "messages.denied_message_confirmation",
+                Placeholder.unparsed("sender_name", request.sender().getName()));
     }
+
+    public boolean canUseCommand(Player player) {
+        boolean usePermission = config.getBoolean("use_permissions");
+
+        if (!usePermission) {
+            return true;
+        }
+
+        return player.hasPermission("modernteleport.teleport");
+    }
+
 
     public void setCoolDown(Player player) {
         if (player.hasPermission("modernteleport.bypasscooldown")) {
@@ -75,12 +75,8 @@ public class TeleportHandler {
     }
 
     public void sendRequest(Player sender, Player target) {
-        String rawMessage = config.getString("messages.request_message");
-        String prefix = config.getString("prefix");
-        String injectedMessage = rawMessage.replace("%prefix%", prefix).replace("%sender_name%", sender.getName());
-
-        Component message = MiniMessage.miniMessage().deserialize(injectedMessage);
-        target.sendMessage(message);
+        modernTeleport.messagePlayer(target, "messages.request_message",
+                Placeholder.unparsed("sender_name", sender.getName()));
 
         // Store the request
         requests.put(target.getUniqueId().toString(), new TeleportRequest(sender, target, System.currentTimeMillis()));
@@ -104,15 +100,46 @@ public class TeleportHandler {
 
                 requests.remove(targetUid);
 
-                String message = config.getString("messages.target_not_respond");
-                sender.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(message.replace("%prefix%", modernTeleport.getPrefix())
-                                .replace("%target_name%", target.getName())));
+                modernTeleport.messagePlayer(sender, "messages.target_not_respond",
+                        Placeholder.unparsed("target_name", target.getName()));
 
                 // Cancel this tasks
                 cancel();
             }
         }.runTaskLaterAsynchronously(modernTeleport, 20L * timeout);
+    }
+
+    public TeleportResult canTeleport(@NotNull Player sender, @Nullable Player target) {
+        if (!canUseCommand(sender)) {
+            return new TeleportResult(false, "messages.no_permission");
+        }
+
+        if (target == null) {
+            return new TeleportResult(false, "messages.invalid_usage");
+        }
+
+        if (!canUseCommand(target)) {
+            return new TeleportResult(false, "messages.target_no_permission");
+        }
+
+        if (sender.getUniqueId().toString().equals(target.getUniqueId().toString())) {
+            return new TeleportResult(false, "messages.request_yourself");
+        }
+
+        if (hasPendingRequest(target)) {
+            return new TeleportResult(false, "messages.has_pending_request");
+        }
+
+        long coolDown = getCoolDownTimeLeft(sender);
+        long targetCoolDown = getCoolDownTimeLeft(target);
+
+        if (coolDown > 0) {
+            return new TeleportResult(false, "messages.target_cool_down");
+        } else if (targetCoolDown > 0) {
+            return new TeleportResult(false, "messages.target_cool_down");
+        }
+
+        return new TeleportResult(true, "messages.request_sent");
     }
 
     public boolean doTeleport(Player target) {

@@ -6,27 +6,35 @@ import dev.betrix.modernteleport.commands.TeleportRejectCommand;
 import dev.betrix.modernteleport.commands.TeleportRequestCommand;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public final class ModernTeleport extends JavaPlugin {
-
-    public boolean canUseCommand(Player player) {
-        boolean usePermission = getConfig().getBoolean("use_permissions");
-
-        if (!usePermission) {
-            return true;
-        }
-
-        return player.hasPermission("modernteleport.teleport");
-    }
 
     public void playSound(Player player, Key key) {
         Sound sound = Sound.sound(key, Sound.Source.BLOCK, 1f, 1f);
 
         player.playSound(sound);
+    }
+
+    public void messagePlayer(Player player, String messageKey, @Nullable TagResolver... tagResolvers) {
+        String message = getConfig().getString(messageKey);
+
+        ArrayList<TagResolver> resolvers = new ArrayList<>();
+        resolvers.add(Placeholder.parsed("prefix", getPrefix()));
+        resolvers.addAll(Arrays.asList(tagResolvers));
+
+
+        player.sendMessage(MiniMessage.miniMessage()
+                .deserialize(message, resolvers.toArray(new TagResolver[0])));
     }
 
     public String getPrefix() {

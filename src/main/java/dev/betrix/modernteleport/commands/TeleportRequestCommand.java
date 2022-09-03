@@ -2,7 +2,9 @@ package dev.betrix.modernteleport.commands;
 
 import dev.betrix.modernteleport.ModernTeleport;
 import dev.betrix.modernteleport.TeleportHandler;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import dev.betrix.modernteleport.TeleportResult;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,84 +33,21 @@ public class TeleportRequestCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         if (sender instanceof Player player) {
-            if (!modernTeleport.canUseCommand(player)) {
-                String noPermission = config.getString("messages.no_permission");
-                player.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(noPermission.replace("%prefix%", prefix)));
-                return true;
-            }
-
-            // Check if no args are present and reject command
-            if (args[0] == null) {
-                return false;
-            }
-
             Player target = modernTeleport.getServer().getPlayer(args[0]);
+            TeleportResult result = teleportHandler.canTeleport(player, target);
 
-            if (!modernTeleport.canUseCommand(target)) {
-                String noPermission = config.getString("messages.target_no_permission");
-                player.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(noPermission.replace("%prefix%", prefix)
-                                .replace("%target_name%", target.getName())));
-                return true;
+            if (result.result()) {
+                teleportHandler.sendRequest(player, Objects.requireNonNull(target));
+
+                modernTeleport.playSound(player, Key.key("entity.experience_orb.pickup"));
+            } else {
+                modernTeleport.playSound(player, Key.key("entity.villager.no"));
             }
 
-            if (target == null) {
-                // User input an invalid player name
-                String notExist = config.getString("messages.player_not_exist");
-                player.sendMessage(MiniMessage.miniMessage().deserialize(notExist.replace("%prefix%", prefix)));
-                return true;
-            }
+            modernTeleport.messagePlayer(player, result.messageKey(),
+                    Placeholder.unparsed("sender_name", sender.getName()),
+                    Placeholder.unparsed("target_name", target.getName()));
 
-            if (Objects.equals(target.getUniqueId().toString(), player.getUniqueId().toString())) {
-                // User sent a request to themselves
-                String requestYourself = config.getString("messages.request_yourself");
-                player.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(requestYourself.replace("%prefix%", prefix)));
-                return true;
-            }
-
-            if (teleportHandler.hasPendingRequest(target)) {
-                // Target already has a pending request
-                String hasPending = config.getString("messages.has_pending_request");
-
-                player.sendMessage(MiniMessage.miniMessage().deserialize(hasPending
-                        .replace("%prefix%", prefix)
-                        .replace("%target_name%", target.getName()))
-                );
-                return true;
-            }
-
-            long coolDown = teleportHandler.getCoolDownTimeLeft(player);
-            long targetCoolDown = teleportHandler.getCoolDownTimeLeft(target);
-
-            if (coolDown > 0) {
-                // User is still on cool down
-                String coolDownMessage = config.getString("messages.user_cool_down");
-
-                player.sendMessage(MiniMessage.miniMessage().deserialize(
-                        coolDownMessage.replace("%prefix%", prefix)
-                                .replace("%cool_down%", coolDown / 1000 + "")));
-
-                return true;
-            } else if (targetCoolDown > 0) {
-                // Target is still on cool down
-                String coolDownMessage = config.getString("messages.target_cool_down");
-
-                player.sendMessage(MiniMessage.miniMessage().deserialize(
-                        coolDownMessage.replace("%prefix%", prefix)
-                                .replace("%cool_down%", coolDown / 1000 + "")
-                                .replace("%target_name%", target.getName())));
-
-                return true;
-            }
-
-            // After all checks pass, send the request to the target player
-            teleportHandler.sendRequest(player, target);
-
-            String sentMessage = config.getString("messages.request_sent");
-            player.sendMessage(MiniMessage.miniMessage()
-                    .deserialize(sentMessage.replace("%prefix%", prefix).replace("%target_name%", target.getName())));
         }
 
         return true;

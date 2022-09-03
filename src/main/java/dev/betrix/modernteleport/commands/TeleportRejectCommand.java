@@ -2,7 +2,6 @@ package dev.betrix.modernteleport.commands;
 
 import dev.betrix.modernteleport.ModernTeleport;
 import dev.betrix.modernteleport.TeleportHandler;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,20 +27,15 @@ public class TeleportRejectCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (sender instanceof Player player) {
-            if (!modernTeleport.canUseCommand(player)) {
-                String noPermission = config.getString("messages.no_permission");
-                player.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(noPermission.replace("%prefix%", prefix)));
+            if (!teleportHandler.canUseCommand(player)) {
+                modernTeleport.messagePlayer(player, "message.no_permission");
                 return true;
             }
 
             if (teleportHandler.hasPendingRequest(player)) {
                 teleportHandler.removePendingRequest(player);
             } else {
-                String noPending = config.getString("messages.no_pending_request");
-                player.sendMessage(
-                        MiniMessage.miniMessage().deserialize(noPending.replace("%prefix%", prefix))
-                );
+                modernTeleport.messagePlayer(player, "messages.no_pending_request");
             }
         }
 
