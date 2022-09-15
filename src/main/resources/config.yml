@@ -15,7 +15,17 @@ cool_down: 10 # seconds
 request_timout: 10 # seconds
 
 # Lock the commands behind the "modernteleport.teleport" permission
-use_permissions: False # True or False
+use_permissions: false # true or false
+
+# Cross-Dimension Teleporting
+# Use the "modernteleport.crossdemension" permission to enable this per player, or set the value below to true
+cross_world_teleporting: true # true or false
+blacklisted_worlds: # List worlds here that can't be teleported in or out of
+  - "world_the_end"
+
+# Max distance between players before a teleport is denied
+# Use the "modernteleport.bypassdistance" permission to disable this per player
+max_distance: 0 # set to 0 to disable this feature globally
 
 messages:
   request_message: "<prefix> <yellow><sender_name> <gold>would like to teleport to you <click:run_command:/tpaccept>[ACCEPT]</click> <red><click:run_command:/tpreject>[DENY]</click>"
@@ -25,8 +35,8 @@ messages:
   no_pending_request: "<prefix> <red>You don't have any pending requests"
   has_pending_request: "<prefix> <yellow><target_name> <gold>already has a pending request"
   request_yourself: "<prefix> <red>You can't make a request to yourself"
-  user_cool_down: "<prefix> <red>You are on cool down for <yellow>%cool_down%</yellow> more seconds"
-  target_cool_down: "<prefix> <red><target_name> is on cool down for <yellow>%cool_down%</yellow> more seconds"
+  user_cool_down: "<prefix> <red>You are on cool down for <yellow><cool_down></yellow> more seconds"
+  target_cool_down: "<prefix> <red><target_name> is on cool down for <yellow><cool_down></yellow> more seconds"
   target_not_respond: "<prefix> <red><target_name> did not respond in time"
   target_accepted: "<prefix> <yellow><target_name> <gold>accepted your request"
   player_not_exist: "<prefix> <red>Player does not exist"
@@ -35,3 +45,7 @@ messages:
   config_reloaded: "<prefix> <gold>Config successfully reloaded"
   no_valid_args: "<prefix> <red>Please enter valid arguments"
   invalid_usage: "<prefix> <red>Please enter a valid player name"
+  different_worlds: "<prefix> <red>You and <target_name> are not in the same dimension"
+  blacklisted_world: "<prefix> <red>You are not able to teleport in this world"
+  target_blacklisted_world: "<prefix> <red><target_name> is not able to teleport in their world"
+  too_far: "<prefix> <red>You are too far from <target_name> to be able to teleport"

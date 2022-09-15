@@ -5,12 +5,15 @@ import dev.betrix.modernteleport.TeleportHandler;
 import dev.betrix.modernteleport.TeleportResult;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class TeleportRequestCommand implements CommandExecutor {
@@ -38,9 +41,14 @@ public class TeleportRequestCommand implements CommandExecutor {
                 modernTeleport.playSound(player, Key.key("entity.villager.no"));
             }
 
-            modernTeleport.messagePlayer(player, result.messageKey(),
-                    Placeholder.unparsed("sender_name", sender.getName()),
-                    Placeholder.unparsed("target_name", target.getName()));
+            ArrayList<TagResolver> resolvers = new ArrayList<>();
+            resolvers.add(Placeholder.unparsed("sender_name", sender.getName()));
+            resolvers.add(Placeholder.unparsed("target_name", target.getName()));
+            if (result.tagResolvers() != null) {
+                resolvers.addAll(Arrays.asList(result.tagResolvers()));
+            }
+
+            modernTeleport.messagePlayer(player, result.messageKey(), resolvers);
 
         }
 

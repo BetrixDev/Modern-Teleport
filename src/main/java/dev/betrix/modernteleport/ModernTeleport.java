@@ -25,6 +25,18 @@ public final class ModernTeleport extends JavaPlugin {
         player.playSound(sound);
     }
 
+    public void messagePlayer(Player player, String messageKey, @Nullable ArrayList<TagResolver> tagResolvers) {
+        String message = getConfig().getString(messageKey);
+
+        ArrayList<TagResolver> resolvers = new ArrayList<>();
+        resolvers.add(Placeholder.parsed("prefix", getConfig().getString("prefix")));
+        resolvers.addAll(tagResolvers);
+
+
+        player.sendMessage(MiniMessage.miniMessage()
+                .deserialize(message, resolvers.toArray(new TagResolver[0])));
+    }
+
     public void messagePlayer(Player player, String messageKey, @Nullable TagResolver... tagResolvers) {
         String message = getConfig().getString(messageKey);
 

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 
 record TeleportRequest(Player sender, Player target, long time) {
 }
@@ -127,6 +128,39 @@ public class TeleportHandler {
             return new TeleportResult(false, "messages.request_yourself");
         }
 
+        boolean bypassCrossDimension = sender.hasPermission("modernteleport.crossdemension") &&
+                target.hasPermission("modernteleport.crossdemension");
+        boolean sameWorlds = !sender.getWorld().getUID().equals(target.getWorld().getUID());
+
+        if (!config.getBoolean("cross_world_teleporting")) {
+            if (sameWorlds && !bypassCrossDimension) {
+                return new TeleportResult(false, "messages.different_worlds");
+            }
+        } else if (!bypassCrossDimension) {
+            List<String> blacklistedWorlds = config.getStringList("blacklisted_worlds");
+
+            if (blacklistedWorlds.contains(sender.getWorld().getName())) {
+                return new TeleportResult(false, "messages.blacklisted_world");
+            } else if (blacklistedWorlds.contains(target.getWorld().getName())) {
+                return new TeleportResult(false, "messages.target_blacklisted_world");
+            }
+        }
+
+        // Don't distance check when players are in different worlds
+        if (!sameWorlds) {
+            boolean bypassDistance = sender.hasPermission("modernteleport.bypassdistance") &&
+                    target.hasPermission("modernteleport.bypassdistance");
+
+            double distance = sender.getLocation().distance(target.getLocation());
+            double maxDistance = config.getDouble("max_distance");
+
+            if (maxDistance > 0 && !bypassDistance) {
+                if (distance > maxDistance) {
+                    return new TeleportResult(false, "messages.too_far");
+                }
+            }
+        }
+
         if (hasPendingRequest(target)) {
             return new TeleportResult(false, "messages.has_pending_request");
         }
@@ -135,9 +169,11 @@ public class TeleportHandler {
         long targetCoolDown = getCoolDownTimeLeft(target);
 
         if (coolDown > 0) {
-            return new TeleportResult(false, "messages.target_cool_down");
+            return new TeleportResult(false, "messages.user_cool_down",
+                    Placeholder.unparsed("cool_down", String.valueOf(coolDown / 1000)));
         } else if (targetCoolDown > 0) {
-            return new TeleportResult(false, "messages.target_cool_down");
+            return new TeleportResult(false, "messages.target_cool_down",
+                    Placeholder.unparsed("cool_down", String.valueOf(coolDown / 1000)));
         }
 
         return new TeleportResult(true, "messages.request_sent");
