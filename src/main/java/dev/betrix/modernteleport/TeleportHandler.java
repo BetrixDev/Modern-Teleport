@@ -96,6 +96,7 @@ public class TeleportHandler {
             public void run() {
                 if (!requests.containsKey(targetUid)) {
                     cancel();
+                    return;
                 }
 
                 requests.remove(targetUid);
