@@ -27,11 +27,7 @@ public class TeleportAcceptCommand implements CommandExecutor {
                 return true;
             }
 
-            if (teleportHandler.hasPendingRequest(player)) {
-                teleportHandler.doTeleport(player);
-            } else {
-                modernTeleport.messagePlayer(player, "messages.no_pending_request");
-            }
+            teleportHandler.handleAccept(player);
         }
 
         return true;

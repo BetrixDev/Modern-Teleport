@@ -9,16 +9,16 @@
 prefix: "<dark_gray>[<gradient:#29a9ff:#82cdff>Modern</gradient> <gradient:#82cdff:#29a9ff>Teleport</gradient>]"
 
 # Cool down each player has between teleport issues, set to 0 to disable globally or use the "modernteleport.bypasscooldown" permission
-cool_down: 10 # seconds
+cool_down: 10 # (seconds)
 
 # How long the target player has to accept or reject the request
-request_timout: 10 # seconds
+request_timout: 10 # (seconds)
 
 # Lock the commands behind the "modernteleport.teleport" permission
 use_permissions: false # true or false
 
 # Cross-Dimension Teleporting
-# Use the "modernteleport.crossdemension" permission to enable this per player, or set the value below to true
+# Use the "modernteleport.crossdimension" permission to enable this per player, or set the value below to true
 cross_world_teleporting: true # true or false
 blacklisted_worlds: # List worlds here that can't be teleported in or out of
   - "world_the_end"
@@ -27,11 +27,16 @@ blacklisted_worlds: # List worlds here that can't be teleported in or out of
 # Use the "modernteleport.bypassdistance" permission to disable this per player
 max_distance: 0 # set to 0 to disable this feature globally
 
+# Time is takes for the teleport to be completed after the request has been accepted
+# Use the "moderteleport.noteleporttime" permission to disable this per player
+teleport_time: 0 # (seconds) set to 0 to disable to feature globally
+can_move_during_teleport: true # true of false
+
 messages:
   request_message: "<prefix> <yellow><sender_name> <gold>would like to teleport to you <click:run_command:/tpaccept>[ACCEPT]</click> <red><click:run_command:/tpreject>[DENY]</click>"
   request_sent: "<prefix> <gold>Teleport request sent to <yellow><target_name>"
   target_denied_message: "<prefix> <yellow><target_name> <gold>has rejected your request"
-  denied_message_confirmation: "<prefix> <gold>You have declined <yellow><sender_name>'s &6request"
+  denied_message_confirmation: "<prefix> <gold>You have declined <yellow><sender_name>'s <gold>request"
   no_pending_request: "<prefix> <red>You don't have any pending requests"
   has_pending_request: "<prefix> <yellow><target_name> <gold>already has a pending request"
   request_yourself: "<prefix> <red>You can't make a request to yourself"
@@ -49,3 +54,8 @@ messages:
   blacklisted_world: "<prefix> <red>You are not able to teleport in this world"
   target_blacklisted_world: "<prefix> <red><target_name> is not able to teleport in their world"
   too_far: "<prefix> <red>You are too far from <target_name> to be able to teleport"
+  teleportation_cancelled: "<prefix> <red>Teleportation has been cancelled"
+  # Only shown if teleport_time is greater than 0
+  boss_bar_title: "<dark_gray>[<gold><sender_name><dark_gray>] <yellow>> <dark_gray>[<gold><target_name><dark_gray>]"
+  sender_tp_confirmation: "<prefix> <yellow>Teleporting you to <gold><target_name></gold> in <seconds> seconds!</yellow> <click:run_command:/tpreject><red>[CANCEL]</click>"
+  target_tp_confirmation: "<prefix> <yellow>Teleporting <gold><sender_name></gold> to you in <seconds> seconds!</yellow> <click:run_command:/tpreject><red>[CANCEL]</click>"

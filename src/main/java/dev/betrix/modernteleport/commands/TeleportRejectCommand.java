@@ -27,11 +27,7 @@ public class TeleportRejectCommand implements CommandExecutor {
                 return true;
             }
 
-            if (teleportHandler.hasPendingRequest(player)) {
-                teleportHandler.removePendingRequest(player);
-            } else {
-                modernTeleport.messagePlayer(player, "messages.no_pending_request");
-            }
+            teleportHandler.handleReject(player);
         }
 
         return true;
